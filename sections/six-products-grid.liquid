@@ -108,6 +108,8 @@
   .section-{{ section.id }} .six-products-grid__item {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
   }
 
   .section-{{ section.id }} .six-products-grid__image-wrapper {
@@ -356,6 +358,9 @@
           {%- if product != blank -%}
             <div class="six-products-grid__image-wrapper">
               {%- assign featured_image = product.featured_image -%}
+              {%- if featured_image == blank -%}
+                {%- assign featured_image = product.images.first -%}
+              {%- endif -%}
               {%- if section.settings.image_ratio == 'square' -%}
                 {% capture sizes %}
                   (min-width: 1200px) {{ 1200 | minus: 40 | divided_by: section.settings.columns_desktop }}px,
