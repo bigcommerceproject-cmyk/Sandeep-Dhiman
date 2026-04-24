@@ -1,0 +1,756 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+
+{%- if section.settings.image_shape == 'blob' -%}
+  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .six-products-grid__title {
+    margin-bottom: 2rem;
+  }
+
+  .six-products-grid__item {
+    position: relative;
+  }
+
+  .six-products-grid__image-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .six-products-grid__marker {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .six-products-grid__marker:hover {
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.1);
+  }
+
+  .six-products-grid__marker::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><path d="M12 5v14M5 12h14"></path></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: invert(0%);
+  }
+
+  .six-products-grid__modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .six-products-grid__modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .six-products-grid__modal-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+  }
+
+  .six-products-grid__modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    z-index: 101;
+  }
+
+  .six-products-grid__product-info {
+    padding: 32px 24px;
+  }
+
+  .six-products-grid__product-info h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 24px;
+  }
+
+  .six-products-grid__product-info .price {
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .six-products-grid__product-info .product-description {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #666;
+  }
+
+  .six-products-grid__product-info .vendor {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #999;
+  }
+
+  .six-products-grid__product-form {
+    margin-top: 24px;
+  }
+
+  .six-products-grid__variant-selector {
+    margin-bottom: 16px;
+  }
+
+  .six-products-grid__variant-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .six-products-grid__variant-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .six-products-grid__quantity-selector {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+
+  .six-products-grid__quantity-selector label {
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .six-products-grid__quantity-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .six-products-grid__button-group {
+    display: flex;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .six-products-grid__add-to-cart {
+    background-color: #000;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+
+  .six-products-grid__add-to-cart:hover {
+    background-color: #333;
+  }
+
+  .six-products-grid__add-to-cart:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .six-products-grid__add-to-cart.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .six-products-grid__view-product {
+    background-color: #f5f5f5;
+    color: #000;
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: block;
+  }
+
+  .six-products-grid__view-product:hover {
+    background-color: #e8e8e8;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} isolate gradient">
+  <div class="page-width section-{{ section.id }}-padding">
+    {%- if section.settings.title != blank -%}
+      <div class="title-wrapper title-wrapper--no-top-margin six-products-grid__title">
+        <h2 class="title inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+          {{ section.settings.title }}
+        </h2>
+      </div>
+    {%- endif -%}
+
+    <ul
+      class="grid product-grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
+      role="list"
+    >
+      {%- for block in section.blocks -%}
+        {%- assign product = block.settings.product -%}
+        <li class="grid__item six-products-grid__item" {{ block.shopify_attributes }}>
+          {%- if product != blank -%}
+            <div class="six-products-grid__image-wrapper">
+              {%- assign featured_image = product.featured_image -%}
+              {%- if section.settings.image_ratio == 'square' -%}
+                {% capture sizes %}
+                  (min-width: 1200px) {{ 1200 | minus: 40 | divided_by: section.settings.columns_desktop }}px,
+                  (min-width: 750px) calc((100vw - 40px) / {{ section.settings.columns_desktop }}),
+                  calc(100vw - 40px)
+                {% endcapture %}
+              {%- else -%}
+                {% capture sizes %}
+                  (min-width: 1200px) {{ 1200 | minus: 40 | divided_by: section.settings.columns_desktop }}px,
+                  (min-width: 750px) calc((100vw - 40px) / {{ section.settings.columns_desktop }}),
+                  calc(100vw - 40px)
+                {% endcapture %}
+              {%- endif -%}
+
+              <div class="media media--{{ section.settings.image_ratio }}">
+                {{
+                  featured_image
+                  | image_url: width: 400
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '200, 300, 400, 500, 600, 800, 1000',
+                    sizes: sizes,
+                    class: 'six-products-grid__image'
+                }}
+              </div>
+
+              <button
+                class="six-products-grid__marker"
+                type="button"
+                data-product-id="{{ product.id }}"
+                aria-label="View {{ product.title | escape }} details"
+              ></button>
+            </div>
+          {%- else -%}
+            <div class="six-products-grid__image-wrapper">
+              <div class="media media--{{ section.settings.image_ratio }}">
+                <div class="placeholder-svg global-media-settings">
+                  {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
+              </div>
+              <button class="six-products-grid__marker" disabled type="button" aria-label="Select a product"></button>
+            </div>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  <!-- Modals for each product -->
+  {%- for block in section.blocks -%}
+    {%- assign product = block.settings.product -%}
+    {%- if product != blank -%}
+      <div class="six-products-grid__modal" data-product-modal="{{ product.id }}">
+        <div class="six-products-grid__modal-content">
+          <button class="six-products-grid__modal-close" type="button" aria-label="Close">×</button>
+
+          <div class="six-products-grid__product-info">
+            {%- if product.featured_image -%}
+              <div class="media media--square" style="margin-bottom: 24px;">
+                {{
+                  product.featured_image
+                  | image_url: width: 600
+                  | image_tag: loading: 'lazy', widths: '300, 400, 500, 600', class: 'six-products-grid__modal-image'
+                }}
+              </div>
+            {%- endif -%}
+
+            <h3>{{ product.title }}</h3>
+
+            {%- if product.vendor -%}
+              <div class="vendor">{{ product.vendor }}</div>
+            {%- endif -%}
+
+            {%- if product.description -%}
+              <div class="product-description">{{ product.description | strip_html | truncatewords: 30 }}</div>
+            {%- endif -%}
+
+            <div class="price">
+              {%- if product.price_varies -%}
+                {{ product.price_min | money }} - {{ product.price_max | money }}
+              {%- else -%}
+                {{ product.price | money }}
+              {%- endif -%}
+
+              {%- if product.compare_at_price > product.price -%}
+                <span style="text-decoration: line-through; color: #999; margin-left: 8px;">
+                  {{ product.compare_at_price | money }}
+                </span>
+              {%- endif -%}
+            </div>
+
+            {%- if product.available -%}
+              <form
+                class="six-products-grid__product-form"
+                data-product-id="{{ product.id }}"
+                method="post"
+                action="/cart/add"
+              >
+                {%- if product.has_only_default_variant == false -%}
+                  <div class="six-products-grid__variant-selector">
+                    <label for="variant-selector-{{ product.id }}">Select Option:</label>
+                    <select id="variant-selector-{{ product.id }}" name="id" required>
+                      {%- for variant in product.variants -%}
+                        <option
+                          value="{{ variant.id }}"
+                          {% if variant.available == false %}
+                            disabled
+                          {% endif %}
+                        >
+                          {{ variant.title }}
+                          {%- if variant.available == false %} — Sold out{% endif -%}
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                  </div>
+                {%- else -%}
+                  <input type="hidden" name="id" value="{{ product.first_available_variant.id }}">
+                {%- endif -%}
+
+                <div class="six-products-grid__quantity-selector">
+                  <label for="quantity-{{ product.id }}">Quantity:</label>
+                  <input
+                    type="number"
+                    id="quantity-{{ product.id }}"
+                    name="quantity"
+                    value="1"
+                    min="1"
+                    class="six-products-grid__quantity-input"
+                  >
+                </div>
+
+                <div class="six-products-grid__button-group">
+                  <button
+                    type="submit"
+                    class="six-products-grid__add-to-cart"
+                    data-product-id="{{ product.id }}"
+                  >
+                    Add to Cart
+                  </button>
+                  <a
+                    href="{{ product.url }}"
+                    class="six-products-grid__view-product"
+                  >
+                    View Full Details
+                  </a>
+                </div>
+              </form>
+            {%- else -%}
+              <div class="six-products-grid__product-form">
+                <p style="color: #999; margin: 16px 0; text-align: center;">This product is currently unavailable.</p>
+                <a
+                  href="{{ product.url }}"
+                  class="six-products-grid__view-product"
+                >
+                  View Full Details
+                </a>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if section.settings.image_shape == 'arch' -%}
+    {{ 'mask-arch.svg' | inline_asset_content }}
+  {%- endif -%}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Get all marker buttons
+    const markers = document.querySelectorAll('.six-products-grid__marker[data-product-id]');
+    const modals = document.querySelectorAll('.six-products-grid__modal');
+    const forms = document.querySelectorAll('.six-products-grid__product-form');
+
+    markers.forEach((marker) => {
+      marker.addEventListener('click', function (e) {
+        e.preventDefault();
+        const productId = this.getAttribute('data-product-id');
+        const modal = document.querySelector(`[data-product-modal="${productId}"]`);
+        if (modal) {
+          modal.classList.add('active');
+        }
+      });
+    });
+
+    // Close modal functionality
+    modals.forEach((modal) => {
+      const closeBtn = modal.querySelector('.six-products-grid__modal-close');
+
+      closeBtn.addEventListener('click', function () {
+        modal.classList.remove('active');
+      });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+
+    // Add to cart form submission
+    forms.forEach((form) => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const addButton = this.querySelector('.six-products-grid__add-to-cart');
+        const originalText = addButton.textContent;
+
+        // Disable button and show loading state
+        addButton.disabled = true;
+        addButton.classList.add('loading');
+        addButton.textContent = 'Adding...';
+
+        // Get form data
+        const formData = new FormData(this);
+
+        // Submit to cart
+        fetch('/cart/add.js', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Update cart count if available
+            if (window.cart && typeof window.cart === 'function') {
+              window.cart();
+            }
+
+            // Show success message
+            addButton.textContent = '✓ Added to Cart';
+            addButton.disabled = false;
+            addButton.classList.remove('loading');
+
+            // Reset button text after 2 seconds
+            setTimeout(() => {
+              addButton.textContent = originalText;
+            }, 2000);
+
+            // Close modal after 1 second
+            setTimeout(() => {
+              const modal = form.closest('.six-products-grid__modal');
+              if (modal) {
+                modal.classList.remove('active');
+              }
+            }, 1000);
+          })
+          .catch((error) => {
+            console.error('Error adding to cart:', error);
+            addButton.textContent = 'Error - Try again';
+            addButton.disabled = false;
+            addButton.classList.remove('loading');
+
+            setTimeout(() => {
+              addButton.textContent = originalText;
+            }, 2000);
+          });
+      });
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        modals.forEach((modal) => {
+          modal.classList.remove('active');
+        });
+      }
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Six Products Grid",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "Featured Products",
+      "label": "Section Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "Small"
+        },
+        {
+          "value": "h1",
+          "label": "Medium"
+        },
+        {
+          "value": "h0",
+          "label": "Large"
+        },
+        {
+          "value": "hxl",
+          "label": "Extra Large"
+        },
+        {
+          "value": "hxxl",
+          "label": "2X Large"
+        }
+      ],
+      "default": "h1",
+      "label": "Heading Size"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Background Color",
+      "info": "Controls the background color of this section",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3,
+      "label": "Columns on Desktop"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "default": "1",
+      "label": "Columns on Mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 Column"
+        },
+        {
+          "value": "2",
+          "label": "2 Columns"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Product Image Settings"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "Adapt to Image"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        }
+      ],
+      "default": "adapt",
+      "label": "Image Ratio"
+    },
+    {
+      "type": "select",
+      "id": "image_shape",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "arch",
+          "label": "Arch"
+        },
+        {
+          "value": "blob",
+          "label": "Blob"
+        },
+        {
+          "value": "chevronleft",
+          "label": "Chevron Left"
+        },
+        {
+          "value": "chevronright",
+          "label": "Chevron Right"
+        },
+        {
+          "value": "diamond",
+          "label": "Diamond"
+        },
+        {
+          "value": "parallelogram",
+          "label": "Parallelogram"
+        },
+        {
+          "value": "round",
+          "label": "Round"
+        }
+      ],
+      "default": "default",
+      "label": "Image Shape"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Six Products Grid",
+      "blocks": [
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

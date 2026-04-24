@@ -1,0 +1,623 @@
+{{ 'section-hero-banner.css' | asset_url | stylesheet_tag }}
+
+{%- if section.settings.height == 'adapt' and section.settings.image != blank -%}
+  {%- style -%}
+    #HeroBanner-{{ section.id }} {
+      --hero-height: {{ section.settings.image.aspect_ratio | default: 2.5 }};
+    }
+  {%- endstyle -%}
+{%- endif -%}
+
+{%- style -%}
+  #HeroBanner-{{ section.id }} {
+    --hero-padding-top: {{ section.settings.padding_top }}px;
+    --hero-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  #HeroBanner-{{ section.id }}::before {
+    opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+  }
+
+  @media screen and (min-width: 750px) {
+    #HeroBanner-{{ section.id }} {
+      --hero-padding-top: {{ section.settings.padding_top_desktop }}px;
+      --hero-padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign fetch_priority = 'auto'
+  if section.index == 1
+    assign fetch_priority = 'high'
+  endif
+-%}
+
+<section
+  id="HeroBanner-{{ section.id }}"
+  class="hero-banner hero-banner--{{ section.settings.height }} hero-banner--align-{{ section.settings.content_alignment }} color-{{ section.settings.color_scheme }}"
+>
+  {%- if section.settings.image != blank -%}
+    <div class="hero-banner__media">
+      {%- if section.settings.image_behavior != 'none' -%}
+        <div class="hero-banner__image animate--{{ section.settings.image_behavior }}">
+      {%- else -%}
+        <div class="hero-banner__image">
+      {%- endif -%}
+      {%- liquid
+        assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
+        assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
+        assign sizes = '100vw'
+      -%}
+      {{
+        section.settings.image
+        | image_url: width: 3840
+        | image_tag:
+          width: section.settings.image.width,
+          height: image_height,
+          class: 'hero-banner__image-tag',
+          sizes: sizes,
+          widths: widths,
+          fetchpriority: fetch_priority
+      }}
+    </div>
+    </div>
+  {%- else -%}
+    <div class="hero-banner__media">
+      <div class="hero-banner__image placeholder-svg">
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="hero-banner__content-wrapper">
+    <div class="page-width">
+      <div class="hero-banner__content">
+        {%- if section.settings.heading != blank -%}
+          <h1 class="hero-banner__heading {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.heading }}
+          </h1>
+        {%- endif -%}
+
+        {%- if section.settings.subheading != blank -%}
+          <div class="hero-banner__subheading rte {{ section.settings.subheading_style }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.subheading }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label_1 != blank or section.settings.button_label_2 != blank -%}
+          <div class="hero-banner__buttons{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {%- if section.settings.button_label_1 != blank -%}
+              <a
+                href="{{ section.settings.button_link_1 }}"
+                class="button hero-banner__button{% if section.settings.button_style_1 == 'primary' %} button--primary{% else %} button--secondary{% endif %}"
+              >
+                {{- section.settings.button_label_1 | escape -}}
+              </a>
+            {%- endif -%}
+
+            {%- if section.settings.button_label_2 != blank -%}
+              <a
+                href="{{ section.settings.button_link_2 }}"
+                class="button hero-banner__button{% if section.settings.button_style_2 == 'primary' %} button--primary{% else %} button--secondary{% endif %}"
+              >
+                {{- section.settings.button_label_2 | escape -}}
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #HeroBanner-{{ section.id }} {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  #HeroBanner-{{ section.id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: {{ section.settings.overlay_color }};
+    z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--small {
+    min-height: 300px;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--medium {
+    min-height: 450px;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--large {
+    min-height: 600px;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--xlarge {
+    min-height: 700px;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__media {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__image.animate--zoom-in img {
+    animation: zoom-in 0.6s ease-out;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__image.animate--fixed {
+    position: fixed;
+    background-attachment: fixed;
+  }
+
+  @keyframes zoom-in {
+    from {
+      transform: scale(1.1);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__content-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: var(--hero-padding-top, 40px) var(--hero-padding-bottom, 40px);
+    text-align: center;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-left .hero-banner__content-wrapper {
+    text-align: left;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-right .hero-banner__content-wrapper {
+    text-align: right;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-left .hero-banner__content {
+    margin: 0;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-right .hero-banner__content {
+    margin: 0 0 0 auto;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__heading {
+    margin: 0 0 20px 0;
+    color: {{ section.settings.heading_color }};
+    font-weight: 700;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__subheading {
+    margin-bottom: 30px;
+    color: {{ section.settings.subheading_color }};
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__subheading.uppercase {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__subheading.subtitle {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-left .hero-banner__buttons {
+    justify-content: flex-start;
+  }
+
+  #HeroBanner-{{ section.id }}.hero-banner--align-right .hero-banner__buttons {
+    justify-content: flex-end;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__button {
+    padding: 14px 32px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__button.button--primary {
+    background-color: {{ section.settings.button_color }};
+    color: #fff;
+    border: 2px solid {{ section.settings.button_color }};
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__button.button--primary:hover {
+    background-color: {{ section.settings.button_color | color_lighten: 10 }};
+    border-color: {{ section.settings.button_color | color_lighten: 10 }};
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__button.button--secondary {
+    background-color: transparent;
+    color: {{ section.settings.button_color }};
+    border: 2px solid {{ section.settings.button_color }};
+  }
+
+  #HeroBanner-{{ section.id }} .hero-banner__button.button--secondary:hover {
+    background-color: {{ section.settings.button_color }};
+    color: #fff;
+  }
+
+  @media screen and (max-width: 749px) {
+    #HeroBanner-{{ section.id }} .hero-banner__heading {
+      font-size: 32px;
+    }
+
+    #HeroBanner-{{ section.id }} .hero-banner__subheading {
+      font-size: 16px;
+    }
+
+    #HeroBanner-{{ section.id }} .hero-banner__buttons {
+      flex-direction: column;
+    }
+
+    #HeroBanner-{{ section.id }} .hero-banner__button {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background Image"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small (300px)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium (450px)"
+        },
+        {
+          "value": "large",
+          "label": "Large (600px)"
+        },
+        {
+          "value": "xlarge",
+          "label": "Extra Large (700px)"
+        }
+      ],
+      "default": "large",
+      "label": "Section Height"
+    },
+    {
+      "type": "select",
+      "id": "image_behavior",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "zoom-in",
+          "label": "Zoom In"
+        },
+        {
+          "value": "fixed",
+          "label": "Fixed Background"
+        }
+      ],
+      "default": "none",
+      "label": "Image Animation"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "Welcome to Our Store",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "Small"
+        },
+        {
+          "value": "h1",
+          "label": "Medium"
+        },
+        {
+          "value": "h0",
+          "label": "Large"
+        },
+        {
+          "value": "hxl",
+          "label": "Extra Large"
+        },
+        {
+          "value": "hxxl",
+          "label": "2X Large"
+        }
+      ],
+      "default": "hxl",
+      "label": "Heading Size"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "default": "<p>Discover amazing products and special offers</p>",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "subheading_style",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body"
+        },
+        {
+          "value": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "body",
+      "label": "Subheading Style"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center",
+      "label": "Content Alignment"
+    },
+    {
+      "type": "header",
+      "content": "Colors & Styling"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "default": "#ffffff",
+      "label": "Heading Color"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "default": "#ffffff",
+      "label": "Subheading Color"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "default": "#000000",
+      "label": "Overlay Color"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 30,
+      "unit": "%",
+      "label": "Overlay Opacity"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "default": "#000000",
+      "label": "Button Color"
+    },
+    {
+      "type": "header",
+      "content": "Button 1"
+    },
+    {
+      "type": "text",
+      "id": "button_label_1",
+      "default": "Shop Now",
+      "label": "Button Label"
+    },
+    {
+      "type": "url",
+      "id": "button_link_1",
+      "label": "Button Link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_1",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        }
+      ],
+      "default": "primary",
+      "label": "Button Style"
+    },
+    {
+      "type": "header",
+      "content": "Button 2"
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Button Label"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Button Link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_2",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        }
+      ],
+      "default": "secondary",
+      "label": "Button Style"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "default": 40,
+      "unit": "px",
+      "label": "Padding Top (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "default": 40,
+      "unit": "px",
+      "label": "Padding Bottom (Mobile)"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "default": 60,
+      "unit": "px",
+      "label": "Padding Top (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "default": 60,
+      "unit": "px",
+      "label": "Padding Bottom (Desktop)"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        {
+          "value": "scheme-1",
+          "label": "Scheme 1"
+        },
+        {
+          "value": "scheme-2",
+          "label": "Scheme 2"
+        }
+      ],
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner",
+      "settings": {
+        "heading": "Welcome to Our Store",
+        "subheading": "<p>Discover amazing products and special offers</p>",
+        "button_label_1": "Shop Now",
+        "button_label_2": "Learn More"
+      }
+    }
+  ]
+}
+{% endschema %}
